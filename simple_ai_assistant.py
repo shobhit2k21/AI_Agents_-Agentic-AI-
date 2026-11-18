@@ -1,16 +1,32 @@
 from openai import OpenAI
+from dotenv import load_dotenv
+import os
 
-client = OpenAI(
-    base_url="http://localhost:11434/v1",
-    api_key="ollama"
-)
-print("Connecting to Ollama...")
-response = client.chat.completions.create(
-    model="qwen3:4b",
-    messages=[
-        {"role": "user", "content": "What is JAVA in CS?"}
-    ]
-)
+load_dotenv() # looks for .env file in the current directory and loads the environment variables
+messages = [] # for temporary memory
+
+while True:
+    user_input = input("\nAsk: ")  # user questions
+    if user_input.lower() in ["exit", "quit", "bye"]:
+        break
+
+    messages.append({"role": "user", "content": user_input})
+
+    client = OpenAI(
+     base_url=os.getenv("BASE_URL"),
+     api_key=os.getenv("API_KEY")
+       )
+
+    print("Connecting to Ollama...")
+
+    response = client.chat.completions.create(
+      model=os.getenv("MODEL"),
+      messages= messages
+         )
+
+    messages.append(
+           {"role": "assistant", "content": response.choices[0].message.content}
+       )
 
 
-print(response.choices[0].message.content)
+    print("Assistant: " + response.choices[0].message.content) # response from LLM 
